@@ -33,21 +33,21 @@ router.get('/', function(req, res, next) {
 router.get('/generate', function(req, res) {
   let count = 0, pages = 0;
   //Get the count to determine pagination
-  function countCoupons(callback) {
+  function countCoupons() {
     
     options.path = '/api/v2/coupons/count';
 
     const countRequest = https.request(options, function(response){
       response.on('data', (d) => {
         count = JSON.parse(d).count
-        console.log('data: ' + count);
+        console.log('Total Coupons: ' + count);
 
         pages = Math.ceil(count/250);
-        console.log('pages: ' + pages);
+        console.log('Pages: ' + pages);
       })
       .on('end', () => {
         //Invoke callback function and pass page count as an argument
-        //callback(pages);
+        retrieveCoupons(count)
       })
     })
       .on('error', (e) => {
@@ -65,10 +65,8 @@ router.get('/generate', function(req, res) {
   function retrieveCoupons(page){
 
     //establish variables to be used in the nested function
-    console.log(page);
     count = 0;
     let body = '', obj;
-    //let newObj = [];
     
     
 
@@ -146,11 +144,17 @@ router.get('/generate', function(req, res) {
 const writeToCSV = (responseFromAPI) => {
   //console.log(typeof (responseFromAPI));
   //console.log(JSON.parse(responseFromAPI));
-  let headers = ['id', 'name',	'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
+  let headers = ['id', 'name', 'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
   'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
   	'date_created'];
-  let values = [];
+  let testValues = [1, 'test', 'money', 5, 0, 'n/a', 'yes', 'testing'];
   let csvArray = [];
+
+  //Testing CSV stuff
+  csvArray.push(headers);
+  csvArray.push(testValues);
+
+  /*
   let toLoop = Object.keys(responseFromAPI[0]);
   for(i=0; i < toLoop.length; i++) {
     headers.push(toLoop[i]);
@@ -159,17 +163,25 @@ const writeToCSV = (responseFromAPI) => {
   responseFromAPI.forEach((element) => {
     values.push([Object.keys(element).map(e => element[e])]);
   })
+  */
   //console.log("headers: " + headers);
   //console.log("values: " + values.toString);
+  /*
   csvArray.push(headers);
   for(i=0;i<values.length; i++){
     csvArray.push(values[i][0])
   }
+  */
   //console.log(csvArray[1][0]);
 
-  let ws = fs.createWriteStream('couponExport.csv');
+  let csvStream = csv.createWriteStream({headers: true}),
+  writableStream = fs.createWriteStream('/exports/couponExport.csv');
 
-  csv.write(csvArray,{headers: false}).pipe(ws);
+  writableStream.on('finish', function(){
+    console.log('Done with CSV');
+  })
+
+  //csv.write(csvArray,{headers: true}).pipe(ws);
   
 }
 
