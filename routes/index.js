@@ -31,8 +31,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/generate', function(req, res) {
-  let count = 0;
-  let pages = 0;
+  let count = 0, pages = 0;
   //Get the count to determine pagination
   function countCoupons(callback) {
     
