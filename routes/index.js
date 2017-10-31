@@ -146,7 +146,9 @@ router.get('/generate', function(req, res) {
 const writeToCSV = (responseFromAPI) => {
   //console.log(typeof (responseFromAPI));
   //console.log(JSON.parse(responseFromAPI));
-  let headers = [];
+  let headers = ['id', 'name',	'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
+  'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
+  	'date_created'];
   let values = [];
   let csvArray = [];
   let toLoop = Object.keys(responseFromAPI[0]);
