@@ -46,8 +46,8 @@ router.get('/generate', function(req, res) {
         console.log('Pages: ' + pages);
       })
       .on('end', () => {
-        //Invoke callback function and pass page count as an argument
-        retrieveCoupons(count)
+        //Invoke callback function
+        retrieveCoupons();
       })
     })
       .on('error', (e) => {
@@ -61,14 +61,12 @@ router.get('/generate', function(req, res) {
   //the argument passed is a callback function
   countCoupons();
 
+  //let initiated = false;
   //Retrieve the coupons
-  function retrieveCoupons(page){
+  function retrieveCoupons(){
 
     //establish variables to be used in the nested function
-    count = 0;
-    let body = '', obj;
-    
-    
+    let body = '', testArr = [];
 
     function couponsAPIrequest(pagenum){
 
@@ -78,92 +76,55 @@ router.get('/generate', function(req, res) {
       
         response.on('data', (d) => {
           body += d;
-          console.log(d);
+          //console.log('test' + JSON.stringify(testArr[0]));
         })
         .on('end', () => {
-          //console.log(body);
-          
-
-          /*obj.forEach(function(element) {
-            newObj.push(element);
-          }, this);*/
-
-          if (count <= 0) {
-            obj = body;
-            console.log('done in test mode');
-            writeToCSV(obj);
-            //console.log(body);
-          }
-          else {
-
-              try {
-              obj = body;
-              //Logging each page to a text file
-              fs.writeFile('testing' + count + '.txt', obj, function(err) {
-                if(err) {
-                    console.log('there was an error: ', err);
-                    return;
-                }
-                console.log('data was appended to file');
-                 
-            
-                
-            });
-
-            } catch (error) {
-              console.log("error: " + error);
-              
-            }
-            //Decrements count, so current page number - 1 is included in
-            //request URI
-            count--;
-                
-            //call this API request recursively until count is 0
-            couponsAPIrequest(count);
-            console.log(count);
-
-          }
-          
+            pages--;
+            writeToCSV(body);
         })
       })
       .on('error', (e) => {
         console.log(e);
       })
       .end();
-      //res.send('Request completed');
     }
 
     //Initial invoke of API request
-    //couponsAPIrequest(count);
+    couponsAPIrequest(pages);
 
   }
     
   
   
-
+let values = [];
 const writeToCSV = (responseFromAPI) => {
   //console.log(typeof (responseFromAPI));
   //console.log(JSON.parse(responseFromAPI));
+  let stuff = JSON.parse(responseFromAPI);
   let headers = ['id', 'name', 'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
   'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
   	'date_created'];
   let testValues = [1, 'test', 'money', 5, 0, 'n/a', 'yes', 'testing'];
+  
   let csvArray = [];
 
   //Testing CSV stuff
+  /*
   csvArray.push(headers);
   csvArray.push(testValues);
-
+  console.log('array biz: ' + JSON.stringify(csvArray));
+  */
   /*
   let toLoop = Object.keys(responseFromAPI[0]);
   for(i=0; i < toLoop.length; i++) {
     headers.push(toLoop[i]);
   }
-
-  responseFromAPI.forEach((element) => {
-    values.push([Object.keys(element).map(e => element[e])]);
-  })
   */
+
+  stuff.forEach((element) => {
+    values.push(Object.keys(element).map(e => element[e]));
+  })
+  
   //console.log("headers: " + headers);
   //console.log("values: " + values.toString);
   /*
@@ -175,11 +136,29 @@ const writeToCSV = (responseFromAPI) => {
   //console.log(csvArray[1][0]);
 
   let csvStream = csv.createWriteStream({headers: true}),
-  writableStream = fs.createWriteStream('/exports/couponExport.csv');
+      writableStream = fs.createWriteStream('couponExport.csv');
 
   writableStream.on('finish', function(){
     console.log('Done with CSV');
-  })
+  });
+  csvStream.pipe(writableStream);
+  csvStream.write(headers);
+  buildOnCSV();
+
+  function buildOnCSV(){
+    //csvStream.write(testValues);
+    
+    if (pages < 1) {
+      for (i = 0; i<values.length; i++) {
+        csvStream.write(values[i]);
+      }
+      csvStream.end(); 
+    } else {
+      retrieveCoupons(); 
+    }
+  }
+
+  
 
   //csv.write(csvArray,{headers: true}).pipe(ws);
   
