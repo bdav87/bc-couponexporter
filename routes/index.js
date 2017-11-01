@@ -15,7 +15,7 @@ router.use(bodyParser.json()); // for parsing application/json
 router.use(bodyParser.urlencoded({ extended: true }));
 
 const options = {
-  host: 'store-hfdehryc.mybigcommerce.com',
+  host: process.env.BC_URL,
   path: '/api/v2/coupons',
   method: 'GET',
   headers: {
