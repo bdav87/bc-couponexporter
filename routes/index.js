@@ -100,40 +100,14 @@ let values = [];
 const writeToCSV = (responseFromAPI) => {
   //console.log(typeof (responseFromAPI));
   //console.log(JSON.parse(responseFromAPI));
-  let stuff = JSON.parse(responseFromAPI);
+  let couponData = JSON.parse(responseFromAPI);
   let headers = ['id', 'name', 'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
   'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
   	'date_created'];
-  let testValues = [1, 'test', 'money', 5, 0, 'n/a', 'yes', 'testing'];
-  
-  let csvArray = [];
 
-  //Testing CSV stuff
-  /*
-  csvArray.push(headers);
-  csvArray.push(testValues);
-  console.log('array biz: ' + JSON.stringify(csvArray));
-  */
-  /*
-  let toLoop = Object.keys(responseFromAPI[0]);
-  for(i=0; i < toLoop.length; i++) {
-    headers.push(toLoop[i]);
-  }
-  */
-
-  stuff.forEach((element) => {
+  couponData.forEach((element) => {
     values.push(Object.keys(element).map(e => element[e]));
   })
-  
-  //console.log("headers: " + headers);
-  //console.log("values: " + values.toString);
-  /*
-  csvArray.push(headers);
-  for(i=0;i<values.length; i++){
-    csvArray.push(values[i][0])
-  }
-  */
-  //console.log(csvArray[1][0]);
 
   let csvStream = csv.createWriteStream({headers: true}),
       writableStream = fs.createWriteStream('couponExport.csv');
@@ -146,7 +120,6 @@ const writeToCSV = (responseFromAPI) => {
   buildOnCSV();
 
   function buildOnCSV(){
-    //csvStream.write(testValues);
     
     if (pages < 1) {
       for (i = 0; i<values.length; i++) {
@@ -158,10 +131,6 @@ const writeToCSV = (responseFromAPI) => {
     }
   }
 
-  
-
-  //csv.write(csvArray,{headers: true}).pipe(ws);
-  
 }
 
 res.send('donezo');
