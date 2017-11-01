@@ -106,7 +106,17 @@ const writeToCSV = (responseFromAPI) => {
   	'date_created'];
 
   couponData.forEach((element) => {
-    values.push(Object.keys(element).map(e => element[e]));
+    /*if (element['applies_to']){
+      values.push(element['applies_to']);
+   }*/
+    (function checkForObjects(){
+      let checkerArray = Object.keys(element).map(e => element[e]);
+      //console.log('checker ' + checkerArray[8]['entity'] + checkerArray[8]['ids']);
+      checkerArray[8] = checkerArray[8]['entity'] + ': ' + checkerArray[8]['ids'];
+      //console.log(checkerArray);
+      values.push(checkerArray);
+    }());
+    //values.push(Object.keys(element).map(e => element[e]));
   })
 
   let csvStream = csv.createWriteStream({headers: true}),
