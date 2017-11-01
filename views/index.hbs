@@ -1,2 +1,14 @@
 <h1>{{title}}</h1>
-<button id="Generate">Generate CSV</button>
+<div><button id="Generate">Generate CSV</button>
+<button id="Clear">Clear query results</button></div>
+
+<div style="margin: 15px 0">
+<form id="getCouponForm">
+    <label for="couponID">Query coupon</label>
+    <input type="text" placeholder="Coupon ID" id="couponID"/>
+    <input type="submit" value="submit">
+</form>
+</div>
+<div style="max-width:80%; word-wrap: break-word;">
+<p id="couponOutput"></p>
+</div>

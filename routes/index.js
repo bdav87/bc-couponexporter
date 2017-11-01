@@ -167,4 +167,24 @@ const writeToCSV = (responseFromAPI) => {
 res.send('donezo');
 });
 
+router.post('/query', function(req,res){
+  console.log(req.body.id);
+  let body = '';
+  options.path = '/api/v2/coupons/' + req.body.id;
+  const getCouponData = https.request(options, function(response){
+    response.on('data', (d)=> {
+      body += d;
+      console.log(body);
+    })
+    .on('end', () => {
+      res.send(body);
+    })
+  })
+  .on('error', (e) => {
+    console.log('error: ' + e);
+  })
+  .end();
+  
+});
+
 module.exports = router;
