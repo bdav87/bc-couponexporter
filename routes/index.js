@@ -98,25 +98,30 @@ router.get('/generate', function(req, res) {
   
 let values = [];
 const writeToCSV = (responseFromAPI) => {
-  //console.log(typeof (responseFromAPI));
-  //console.log(JSON.parse(responseFromAPI));
+
   let couponData = JSON.parse(responseFromAPI);
   let headers = ['id', 'name', 'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
   'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
   	'date_created'];
 
   couponData.forEach((element) => {
-    /*if (element['applies_to']){
-      values.push(element['applies_to']);
-   }*/
+
     (function checkForObjects(){
-      let checkerArray = Object.keys(element).map(e => element[e]);
-      //console.log('checker ' + checkerArray[8]['entity'] + checkerArray[8]['ids']);
-      checkerArray[8] = checkerArray[8]['entity'] + ': ' + checkerArray[8]['ids'];
-      //console.log(checkerArray);
-      values.push(checkerArray);
+      
+      //This defines the overall row of items added to the CSV
+      let row = Object.keys(element).map(e => element[e]);
+      
+      //This index refers to product and category restrictions
+      row[8] = row[8]['entity'] + ': ' + row[8]['ids'];
+      
+      //Checks if there are any state, country or zip restrictions
+      if (Object.keys(row[12]).length > 0){
+        
+        let sub = Object.keys(row[12]);//.map(e => row[12][e]));
+        row[12] = sub + ': ' + JSON.stringify(row[12][sub]).toString();
+      }
+      values.push(row);
     }());
-    //values.push(Object.keys(element).map(e => element[e]));
   })
 
   let csvStream = csv.createWriteStream({headers: true}),
