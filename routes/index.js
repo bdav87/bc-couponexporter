@@ -8,12 +8,6 @@ const csv = require('fast-csv');
 const dotenv = require('dotenv');
 dotenv.load();
 
-
-router.use(express.static(path.join(__dirname, 'public')));
-
-router.use(bodyParser.json()); // for parsing application/json
-router.use(bodyParser.urlencoded({ extended: true }));
-
 const options = {
   host: process.env.BC_URL,
   path: '/api/v2/coupons',
@@ -31,15 +25,20 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/generate', function(req, res) {
-  let count = 0, pages = 0;
-  //Get the count to determine pagination
+  // Variable declarations
+  // count will be the total number of coupons on the store
+  // pages is used to in a URI parameter to paginate API requests
+  // values will populate with the data that is pushed to the CSV
+  let count = 0, pages = 0, values = [];
+  
+  //Get the total number of coupons to determine pagination
   function countCoupons() {
     
     options.path = '/api/v2/coupons/count';
 
     const countRequest = https.request(options, function(response){
       response.on('data', (d) => {
-        count = JSON.parse(d).count
+        count = JSON.parse(d).count;
         console.log('Total Coupons: ' + count);
 
         pages = Math.ceil(count/250);
@@ -56,18 +55,16 @@ router.get('/generate', function(req, res) {
       .end();
     
   };
-  //This should invoke the function that calls for a count of coupon codes
-  //and then divides by 250 and rounds up to determine number of pages
-  //the argument passed is a callback function
+  //Invoking the countCoupons function to start the whole process
   countCoupons();
 
-  //let initiated = false;
   //Retrieve the coupons
   function retrieveCoupons(){
 
-    //establish variables to be used in the nested function
-    let body = '', testArr = [];
+    let body = '';
 
+    // This function will be invoked multiple times if there are more than 250 coupons.
+    // The current page is passed in the pagenum parameter.
     function couponsAPIrequest(pagenum){
 
     options.path = '/api/v2/coupons?limit=250&page=' + pagenum;
@@ -76,7 +73,6 @@ router.get('/generate', function(req, res) {
       
         response.on('data', (d) => {
           body += d;
-          //console.log('test' + JSON.stringify(testArr[0]));
         })
         .on('end', () => {
             pages--;
@@ -89,14 +85,11 @@ router.get('/generate', function(req, res) {
       .end();
     }
 
-    //Initial invoke of API request
+    //Invoke the API request, passing in the pages variable set in countRequest
     couponsAPIrequest(pages);
 
   }
-    
-  
-  
-let values = [];
+
 const writeToCSV = (responseFromAPI) => {
 
   let couponData = JSON.parse(responseFromAPI);
@@ -117,7 +110,7 @@ const writeToCSV = (responseFromAPI) => {
       //Checks if there are any state, country or zip restrictions
       if (Object.keys(row[12]).length > 0){
         
-        let sub = Object.keys(row[12]);//.map(e => row[12][e]));
+        let sub = Object.keys(row[12]);
         row[12] = sub + ': ' + JSON.stringify(row[12][sub]).toString();
       }
       values.push(row);
@@ -148,9 +141,11 @@ const writeToCSV = (responseFromAPI) => {
 
 }
 
-res.send('donezo');
+res.send('CSV generated');
 });
 
+// This lets you display the data for a single coupon on the app page.
+// I used this to help determine how to format the CSV
 router.post('/query', function(req,res){
   console.log(req.body.id);
   let body = '';
