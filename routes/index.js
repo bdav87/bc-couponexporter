@@ -93,9 +93,8 @@ router.get('/generate', function(req, res) {
 const writeToCSV = (responseFromAPI) => {
 
   let couponData = JSON.parse(responseFromAPI);
-  let headers = ['id', 'name', 'type',	'amount',	'min_purchase',	'expires',	'enabled', 'code',
-  'applies_to',	'num_uses',	'max_uses',	'max_uses_per_customer',	'restricted_to',	'shipping_methods',
-  	'date_created'];
+  let headers = ['id', 'name', 'type', 'amount', 'min_purchase', 'expires', 'enabled', 'code',
+  'applies_to',	'num_uses', 'max_uses', 'max_uses_per_customer', 'restricted_to', 'shipping_methods', 'date_created'];
 
   couponData.forEach((element) => {
 
