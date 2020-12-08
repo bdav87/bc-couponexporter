@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "dotenv": "^4.0.0",
-    "fast-csv": "^3.4.0",
+    "fast-csv": "^4.3.6",
     "node-bigcommerce": "^4.0.1"
   }
 }
